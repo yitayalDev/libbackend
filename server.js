@@ -51,21 +51,34 @@ app.use(helmet({
 
 // CORS Configuration
 const allowedOrigins = process.env.FRONTEND_URL
-    ? process.env.FRONTEND_URL.split(',').map(s => s.trim())
+    ? process.env.FRONTEND_URL.split(',').map(s => s.trim().replace(/\/$/, ''))
     : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'];
 
-app.use(cors({
+const corsOptions = {
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+        if (!origin) return callback(null, true);
+        const cleanOrigin = origin.replace(/\/$/, '');
+        
+        // Allow configured origins, any onrender.com deployment, or localhost
+        const isAllowed = allowedOrigins.includes(cleanOrigin) ||
+                          cleanOrigin.endsWith('.onrender.com') ||
+                          cleanOrigin.includes('localhost') ||
+                          cleanOrigin.includes('127.0.0.1');
+
+        if (isAllowed || process.env.NODE_ENV !== 'production') {
             callback(null, true);
         } else {
+            console.warn(`[CORS] Blocked request from origin: ${origin}`);
             callback(new Error('Blocked by CORS policy'));
         }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
-}));
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Rate Limiting
 const generalLimiter = rateLimit({
