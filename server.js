@@ -610,6 +610,7 @@ async function seedData() {
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes); // Fallback if client calls without /api
 app.use('/api/users', userRoutes);
 app.use('/api/labs', labRoutes);
 app.use('/api/bookings', bookingRoutes);
