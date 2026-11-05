@@ -4,6 +4,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
 const path = require('path');
+const fs = require('fs');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { initializeBot } = require('./services/telegramBot');
@@ -609,9 +610,9 @@ app.use('/api/superadmin', superadminRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/settings', settingsRoutes);
 
-// Serve frontend static files in production
-if (process.env.NODE_ENV === 'production') {
-    const frontendPath = path.join(__dirname, '..', 'frontend', 'dist');
+// Serve frontend static files only if they exist in the directory (unified deployment)
+const frontendPath = path.join(__dirname, '..', 'frontend', 'dist');
+if (process.env.NODE_ENV === 'production' && fs.existsSync(frontendPath)) {
     app.use(express.static(frontendPath));
 
     // Handle React SPA routing, return index.html for non-API requests
@@ -620,6 +621,16 @@ if (process.env.NODE_ENV === 'production') {
             return next();
         }
         res.sendFile(path.join(frontendPath, 'index.html'));
+    });
+} else {
+    // Standalone Backend API root
+    app.get('/', (req, res) => {
+        res.json({
+            message: 'CLM Backend API is running successfully',
+            status: 'online',
+            environment: process.env.NODE_ENV || 'production',
+            health: '/api/health'
+        });
     });
 }
 
