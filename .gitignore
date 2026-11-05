@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# User uploads
+uploads/*
+!uploads/.gitkeep
+*.docx
+query
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Runtime data
+pids
+
+# Testing and linting
+coverage/
+.eslintcache
